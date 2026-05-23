@@ -34,6 +34,8 @@ PASS test (no ROS2 needed):
   python3 camera_node.py --test --right   # right camera only
 """
 
+from __future__ import annotations
+
 import argparse
 import threading
 import time
