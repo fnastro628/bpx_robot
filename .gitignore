@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# ROS2 build artifacts
+install/
+log/
+build/
+*.log
+
+# Compiled C++
+*.o
+*.so
+*.a
+*.out
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Models and large binary assets (download separately)
+*.tflite
+*.onnx
+*.engine
+*.pt
+*.pth
+*.db
+
+# Calibration data (machine-specific)
+*.json
+
+# Secrets / credentials
+.env
+*.pem
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

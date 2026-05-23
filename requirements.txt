@@ -1,0 +1,47 @@
+# Python dependencies for BPX robot system
+# Target: Jetson Orin Nano Super, JetPack 6.x, Ubuntu 22.04
+
+# ── Speech-to-Text ──────────────────────────────────────────────────────────
+faster-whisper>=1.0.0          # CTranslate2-based Whisper, fast on Jetson CUDA
+webrtcvad>=2.0.10              # Voice Activity Detection
+sounddevice>=0.4.6             # Audio I/O
+soundfile>=0.12.1
+
+# ── Text-to-Speech ───────────────────────────────────────────────────────────
+piper-tts>=1.2.0               # Offline TTS, low latency
+
+# ── Face Recognition ─────────────────────────────────────────────────────────
+insightface>=0.7.3             # ArcFace embeddings (buffalo_l model)
+onnxruntime-gpu>=1.17.0        # GPU inference backend for InsightFace
+
+# ── Object Detection ─────────────────────────────────────────────────────────
+ultralytics>=8.2.0             # YOLOv8; export to TensorRT with model.export(format='engine')
+
+# ── Computer Vision / Compute ────────────────────────────────────────────────
+numpy>=1.24.0
+scipy>=1.11.0
+Pillow>=10.0.0
+opencv-python>=4.8.0
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+pyyaml>=6.0
+
+# ── Acoustic pipeline (CAP 1–15) ────────────────────────────────────────────
+pyusb>=1.2.1                   # XVF3800 USB HID control (DOA, VAD, beam lock)
+openwakeword>=0.6.0            # Lightweight offline wake word detection (CAP 7)
+tflite-runtime>=2.14.0         # YAMNet inference — use on Jetson (lighter than TF)
+# tensorflow>=2.14.0           # Uncomment if tflite-runtime is unavailable
+speechbrain>=1.0.0             # Emotion recognition wav2vec2-IEMOCAP (CAP 13)
+onnxruntime>=1.17.0            # ONNX runtime for exported SpeechBrain model
+dynamixel-sdk>=3.7.31          # Pan/tilt head servo controller — Dynamixel XL430-W250
+
+# ── ROS2 packages (managed by rosdep, listed for reference) ──────────────────
+# rclpy
+# sensor_msgs
+# geometry_msgs
+# nav_msgs
+# std_msgs
+# std_srvs
+# cv_bridge
+# tf2_ros
+# rtabmap_ros   (apt: ros-humble-rtabmap-ros)

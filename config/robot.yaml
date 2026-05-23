@@ -1,0 +1,89 @@
+robot:
+  name: "bpx"
+  ip: "10.21.20.1"           # wired; wireless: 192.168.0.1
+
+head:
+  pan_servo_channel:  0      # PCA9685 channel
+  tilt_servo_channel: 1
+  pan_range_deg:  [-90, 90]
+  tilt_range_deg: [-30, 30]
+  default_pan_deg:  0
+  default_tilt_deg: 0
+
+camera:
+  type: "waveshare_stereo"
+  left_device:  "/dev/video0"
+  right_device: "/dev/video1"
+  width:  1280
+  height: 720
+  fps:    30
+  baseline_m: 0.060          # 60 mm — measure your exact unit
+  focal_length_px: 800       # placeholder — update after calibration
+
+audio:
+  input_device:  "default"
+  output_device: "default"
+  sample_rate:   16000
+
+speech:
+  wake_word:  "hey robot"
+  model_size: "small"        # whisper: tiny | base | small | medium
+  language:   "en"
+
+behaviors:
+  approach_speed_mps:  0.35
+  follow_distance_m:   0.80
+  search_timeout_sec:  20.0
+  come_timeout_sec:    30.0
+
+face_recognition:
+  similarity_threshold: 0.45   # cosine similarity (0–1); raise to tighten
+  enroll_frames:        10     # frames averaged per enrollment
+  db_path: "~/.bpx/faces.db"
+
+vslam:
+  map_path: "~/.bpx/maps"
+  detection_rate_hz: 2
+  min_translation_m: 0.10
+  min_rotation_rad:  0.05
+
+acoustic:
+  # XVF3800 USB identifiers — verify with: lsusb | grep -i seeed
+  device_vid: "0x2886"
+  device_pid: "0x0019"           # update if XVF3800 uses different PID
+  doa_update_hz: 20              # HID poll rate
+  energy_smoothing: 0.8          # EMA alpha for energy topic (0=raw, 1=frozen)
+  bark_speaker_device: "default" # audio output device for chirp bark
+
+  # CAP 2 — DOA head tracking
+  doa_smoothing: 0.6             # EMA alpha for head pan commands
+  doa_return_timeout_sec: 3.0    # seconds of silence before head returns to 0°
+  head_max_pan_speed_dps: 120.0  # degrees per second
+
+  # CAP 4 — Clap detection
+  clap_energy_threshold: 0.35    # min energy spike to count as a clap
+  clap_window_sec: 1.0           # window to count multiple claps
+
+  # CAP 5 — Passive tracking
+  passive_energy_threshold: 0.05 # min energy to track (above ambient noise)
+
+  # CAP 6 — Proximity estimation
+  proximity_ref_energy: 0.6      # energy reading at 0.5 m calibration distance
+  proximity_ref_dist_m: 0.5
+
+  # CAP 8 — Acoustic event detection
+  event_model: "yamnet"          # yamnet | custom
+  event_window_sec: 0.5
+  event_confidence_threshold: 0.75
+
+  # CAP 9-11 — Room acoustics
+  bark_duration_sec: 0.3         # chirp bark length
+  bark_freq_lo_hz: 100           # chirp start frequency
+  bark_freq_hi_hz: 8000          # chirp end frequency
+  rir_record_sec: 1.0            # total recording time per bark
+  room_db_path: "~/.bpx/rooms.db"
+  room_confidence_threshold: 0.70
+
+  # CAP 12 — Speaker memory
+  memory_db_path: "~/.bpx/speaker_memory.db"
+  memory_min_vad_sec: 0.5        # min speech duration to log a location event

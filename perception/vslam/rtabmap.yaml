@@ -1,0 +1,68 @@
+# RTAB-Map parameters for Waveshare IMX219-83 stereo + ICM20948 IMU on Jetson Orin Nano Super
+#
+# Recommended pipeline:
+#   Isaac ROS cuVSLAM  →  real-time stereo-inertial odometry  (GPU-accelerated)
+#   RTAB-Map           →  global map management + loop closure (consumes cuVSLAM output)
+#
+# Install:
+#   sudo apt install ros-humble-rtabmap-ros
+#   sudo apt install ros-humble-isaac-ros-visual-slam   (from NVIDIA Isaac ROS)
+#
+# BEFORE FIRST RUN:
+#   1. Calibrate cameras:
+#        ros2 run camera_calibration cameracalibrator \
+#          --size 8x6 --square 0.025 \
+#          left:=/camera/left/image_raw right:=/camera/right/image_raw
+#   2. Calibrate IMU-camera transform (kalibr or imu_utils)
+#   3. Update focal_length_px and baseline_m in config/robot.yaml
+#   4. Confirm /camera/left/camera_info and /camera/right/camera_info are publishing
+#
+# NOTE: IMX219 has rolling shutter. cuVSLAM handles RS correction internally.
+# The ICM20948 IMU connects via I2C — soft timestamp sync. Acceptable for indoor use.
+
+# ── Processing rate ────────────────────────────────────────────────────────────
+Rtabmap/DetectionRate: "2"         # Hz — map update rate (balance CPU vs quality)
+Rtabmap/TimeThr:       "0"         # 0 = no time limit per iteration
+
+# ── Memory management ──────────────────────────────────────────────────────────
+Mem/STMSize:               "30"    # short-term memory size (recent keyframes)
+Mem/RehearsalSimilarity:   "0.45"
+Mem/ImagePreDecimation:    "2"     # downsample input 2× before processing
+Mem/ImagePostDecimation:   "1"
+
+# ── Stereo processing ──────────────────────────────────────────────────────────
+Stereo/MinDisparity:   "1"
+Stereo/MaxDisparity:   "128"
+Stereo/SmoothingPenalty: "10"
+
+# ── Visual odometry ────────────────────────────────────────────────────────────
+Odom/Strategy:          "0"        # 0 = Frame-to-Map (F2M), robust to fast motion
+Odom/ResetCountdown:    "15"       # reset VO after N consecutive failures
+OdomF2M/MaxSize:        "2000"     # max features kept in local map
+OdomF2M/BundleAdjustment: "0"     # disable BA for real-time on Jetson
+
+# ── Feature detection ──────────────────────────────────────────────────────────
+Kp/MaxFeatures:      "500"
+Kp/DetectorStrategy: "6"           # 6 = ORB (fastest on CPU/GPU)
+
+# ── Loop closure ───────────────────────────────────────────────────────────────
+RGBD/LoopClosureReextendedInliers: "20"
+LccBow/MinInliers:      "15"
+LccBow/MaxDepth:        "4.0"      # max depth for stereo matches (metres)
+
+# ── Map update thresholds ──────────────────────────────────────────────────────
+RGBD/LinearUpdate:     "0.10"      # min translation (m) to trigger new node
+RGBD/AngularUpdate:    "0.05"      # min rotation  (rad)
+
+# ── Occupancy grid ─────────────────────────────────────────────────────────────
+Grid/3D:        "false"
+Grid/CellSize:  "0.05"            # 5 cm resolution
+
+# ── Landmark detection (ArUco) ─────────────────────────────────────────────────
+# Place 10×10 cm ArUco markers at known locations for precise re-localisation
+Marker/Dictionary: "16"            # DICT_6X6_250
+Marker/Length:     "0.10"          # marker size in metres
+
+# ── Map saving ─────────────────────────────────────────────────────────────────
+# Maps are saved to ~/.ros/rtabmap.db by default.
+# Load an existing map at startup with --delete_db_on_start false
