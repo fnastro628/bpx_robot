@@ -53,6 +53,8 @@ try:
 except ImportError:
     _HAS_ROS = False
     _HAS_CV_BRIDGE = False
+    class Node:  # dummy base so class definition succeeds without ROS2
+        pass
 
 DEFAULT_WIDTH  = 1280
 DEFAULT_HEIGHT = 720
