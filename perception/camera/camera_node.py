@@ -40,15 +40,18 @@ import time
 
 import cv2
 import numpy as np
-import rclpy
-from rclpy.node import Node
-from sensor_msgs.msg import CameraInfo, Image
-from std_msgs.msg import Header
 
+# ROS2 imports are deferred — test mode works without them
 try:
+    import rclpy
+    from rclpy.node import Node
+    from sensor_msgs.msg import CameraInfo, Image
+    from std_msgs.msg import Header
     from cv_bridge import CvBridge
+    _HAS_ROS = True
     _HAS_CV_BRIDGE = True
 except ImportError:
+    _HAS_ROS = False
     _HAS_CV_BRIDGE = False
 
 DEFAULT_WIDTH  = 1280
@@ -134,6 +137,10 @@ class StereoCameraNode(Node):
         self._fid_l = self.get_parameter("frame_id_left").value
         self._fid_r = self.get_parameter("frame_id_right").value
 
+        if not _HAS_ROS:
+            raise RuntimeError(
+                "ROS2 not found — run: source /opt/ros/humble/setup.bash"
+            )
         if not _HAS_CV_BRIDGE:
             raise RuntimeError("cv_bridge not found — install ros-humble-cv-bridge")
 
