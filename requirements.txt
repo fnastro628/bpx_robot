@@ -1,5 +1,13 @@
 # Python dependencies for BPX robot system
 # Target: Jetson Orin Nano Super, JetPack 6.x, Ubuntu 22.04
+#
+# NOTE — Jetson GPU packages not on PyPI (install separately after this file):
+#   onnxruntime-gpu : pip install $(curl -s https://api.github.com/repos/microsoft/onnxruntime/releases \
+#                       | python3 -c "import sys,json; \
+#                         [print(a['browser_download_url']) for r in json.load(sys.stdin) \
+#                         for a in r['assets'] if 'aarch64' in a['name'] and 'gpu' in a['name'] \
+#                         and a['name'].endswith('.whl')]" | head -1)
+#   Simpler: see https://elinux.org/Jetson_Zoo#ONNX_Runtime for the current wheel URL.
 
 # ── Speech-to-Text ──────────────────────────────────────────────────────────
 faster-whisper>=1.0.0          # CTranslate2-based Whisper, fast on Jetson CUDA
@@ -12,7 +20,8 @@ piper-tts>=1.2.0               # Offline TTS, low latency
 
 # ── Face Recognition ─────────────────────────────────────────────────────────
 insightface>=0.7.3             # ArcFace embeddings (buffalo_l model)
-onnxruntime-gpu>=1.17.0        # GPU inference backend for InsightFace
+# onnxruntime-gpu — NOT on PyPI for aarch64; install Jetson wheel separately (see note above)
+onnxruntime>=1.17.0            # CPU fallback / dev machines; GPU wheel replaces this on Jetson
 
 # ── Object Detection ─────────────────────────────────────────────────────────
 ultralytics>=8.2.0             # YOLOv8; export to TensorRT with model.export(format='engine')
@@ -32,7 +41,6 @@ openwakeword>=0.6.0            # Lightweight offline wake word detection (CAP 7)
 tflite-runtime>=2.14.0         # YAMNet inference — use on Jetson (lighter than TF)
 # tensorflow>=2.14.0           # Uncomment if tflite-runtime is unavailable
 speechbrain>=1.0.0             # Emotion recognition wav2vec2-IEMOCAP (CAP 13)
-onnxruntime>=1.17.0            # ONNX runtime for exported SpeechBrain model
 dynamixel-sdk>=3.7.31          # Pan/tilt head servo controller — Dynamixel XL430-W250
 
 # ── ROS2 packages (managed by rosdep, listed for reference) ──────────────────
