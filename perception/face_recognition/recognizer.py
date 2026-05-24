@@ -55,14 +55,22 @@ class FaceRecognizer(Node):
 
         # Load InsightFace
         try:
+            import onnxruntime as ort
+            available = ort.get_available_providers()
+            providers = (
+                ["CUDAExecutionProvider", "CPUExecutionProvider"]
+                if "CUDAExecutionProvider" in available
+                else ["CPUExecutionProvider"]
+            )
             from insightface.app import FaceAnalysis
             self._fa = FaceAnalysis(
-                name="buffalo_l",
-                providers=["CUDAExecutionProvider", "CPUExecutionProvider"]
+                name="buffalo_sc",   # lighter than buffalo_l; same ArcFace accuracy
+                providers=providers,
             )
-            self._fa.prepare(ctx_id=0, det_size=(640, 640))
+            self._fa.prepare(ctx_id=0 if "CUDAExecutionProvider" in providers else -1,
+                             det_size=(320, 320))
             self.get_logger().info(
-                f"InsightFace ready. DB: {self.db.list_people()}"
+                f"InsightFace ready ({providers[0]}). DB: {self.db.list_people()}"
             )
         except Exception as exc:
             self.get_logger().error(f"InsightFace load failed: {exc}")
