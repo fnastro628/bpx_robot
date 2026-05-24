@@ -55,10 +55,22 @@ class ObjectDetector(Node):
         self.conf   = conf
 
         self.get_logger().info(f"Loading YOLO model: {model_path}")
+        import torch
         from ultralytics import YOLO
         self.model = YOLO(model_path)
-        self.model.to(f"cuda:{device}" if device.isdigit() else device)
-        self.get_logger().info("YOLO ready.")
+        if device.isdigit():
+            if torch.cuda.is_available():
+                target = f"cuda:{device}"
+            else:
+                self.get_logger().warn(
+                    "CUDA not available — running on CPU. "
+                    "Install Jetson PyTorch wheel for GPU speed."
+                )
+                target = "cpu"
+        else:
+            target = device
+        self.model.to(target)
+        self.get_logger().info(f"YOLO ready on {target}.")
 
         self._img_sub = self.create_subscription(
             Image, "/camera/left/image_raw", self._on_image, 1
