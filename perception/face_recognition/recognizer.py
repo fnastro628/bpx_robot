@@ -109,16 +109,20 @@ class FaceRecognizer(Node):
             cv2.COLOR_BGR2RGB,
         )
 
-        locations = self._fr.face_locations(small_rgb, model="hog")
+        locations = self._fr.face_locations(small_rgb, model="hog",
+                                              number_of_times_to_upsample=2)
         encodings = self._fr.face_encodings(small_rgb, locations)
 
         self._frame_count += 1
         if self._frame_count % DEBUG_EVERY == 0:
+            # Save a frame so we can inspect what the detector sees
+            cv2.imwrite(f"/tmp/face_debug_{self._frame_count}.jpg",
+                        cv2.cvtColor(small_rgb, cv2.COLOR_RGB2BGR))
             self.get_logger().info(
                 f"frame {self._frame_count}: {len(locations)} face(s) detected "
                 f"(image {small_rgb.shape[1]}×{small_rgb.shape[0]}, "
                 f"enrolling={self._enrolling_name is not None}, "
-                f"buf={len(self._enroll_buf)})"
+                f"buf={len(self._enroll_buf)}) — saved /tmp/face_debug_{self._frame_count}.jpg"
             )
 
         scale   = int(1 / DETECT_SCALE)
