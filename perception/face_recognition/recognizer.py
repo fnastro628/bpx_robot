@@ -42,6 +42,7 @@ from perception.face_recognition.face_db import FaceDatabase
 
 ENROLL_FRAMES  = 10    # frames to average per enrollment
 DETECT_SCALE   = 0.5   # downsample factor for face detection (speed)
+DEBUG_EVERY    = 30    # log face count every N frames
 
 
 class FaceRecognizer(Node):
@@ -59,6 +60,7 @@ class FaceRecognizer(Node):
 
         self._enrolling_name: str | None   = None
         self._enroll_buf: list[np.ndarray] = []
+        self._frame_count = 0
 
         try:
             import face_recognition as fr
@@ -109,6 +111,15 @@ class FaceRecognizer(Node):
 
         locations = self._fr.face_locations(small_rgb, model="hog")
         encodings = self._fr.face_encodings(small_rgb, locations)
+
+        self._frame_count += 1
+        if self._frame_count % DEBUG_EVERY == 0:
+            self.get_logger().info(
+                f"frame {self._frame_count}: {len(locations)} face(s) detected "
+                f"(image {small_rgb.shape[1]}×{small_rgb.shape[0]}, "
+                f"enrolling={self._enrolling_name is not None}, "
+                f"buf={len(self._enroll_buf)})"
+            )
 
         scale   = int(1 / DETECT_SCALE)
         results = []
